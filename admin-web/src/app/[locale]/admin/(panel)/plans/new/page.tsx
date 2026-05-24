@@ -1,0 +1,100 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { AdminBackLink } from "@/components/admin/AdminBackLink";
+import { AdminPage } from "@/components/admin/AdminPage";
+import { AdminField } from "@/components/admin/AdminField";
+import { PanelPageHeader, PanelSection } from "@/components/layout";
+import { FormMessage, FormSubmit } from "@/components/forms";
+import { adminCreatePlan } from "@/lib/admin-api";
+
+export default function NewPlanPage() {
+  const t = useTranslations("adminPanel");
+  const router = useRouter();
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setErr("");
+    const fd = new FormData(e.currentTarget);
+    try {
+      await adminCreatePlan({
+        slug: fd.get("slug"),
+        name: fd.get("name"),
+        description: fd.get("description"),
+        duration_days: Number(fd.get("duration_days")),
+        traffic_gb: fd.get("traffic_gb"),
+        interface_id: Number(fd.get("interface_id") || 1),
+        price_usdt: fd.get("price_usdt"),
+        price_irr: fd.get("price_irr"),
+        is_active: fd.get("is_active") === "on",
+        sort_order: Number(fd.get("sort_order") || 0),
+      });
+      router.push("/admin/plans");
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : t("failed"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <AdminPage>
+      <AdminBackLink href="/admin/plans" label={t("backToPlans")} />
+      <PanelPageHeader title={t("planNewTitle")} />
+      <PanelSection
+        title={t("planFormSection")}
+        description={t("planFormSectionDesc")}
+      >
+        <form onSubmit={onSubmit} className="admin-form max-w-md space-y-3" dir="ltr">
+          <AdminField label={t("planSlug")} name="slug" required />
+          <AdminField label={t("planName")} name="name" required />
+          <AdminField label={t("planDescription")} name="description" multiline />
+          <AdminField
+            label={t("planDurationDays")}
+            name="duration_days"
+            type="number"
+            required
+          />
+          <AdminField label={t("planTrafficGb")} name="traffic_gb" step="0.01" />
+          <AdminField
+            label={t("planInterfaceId")}
+            name="interface_id"
+            type="number"
+            defaultValue="1"
+          />
+          <AdminField
+            label={t("planPriceUsdt")}
+            name="price_usdt"
+            required
+            step="0.01"
+          />
+          <AdminField label={t("planPriceIrr")} name="price_irr" required />
+          <AdminField
+            label={t("planSortOrder")}
+            name="sort_order"
+            type="number"
+            defaultValue="0"
+          />
+          <label className="flex items-center gap-2 text-xs text-[var(--muted)]">
+            <input
+              name="is_active"
+              type="checkbox"
+              defaultChecked
+              className="h-3.5 w-3.5 rounded border-[var(--input-border)] bg-[var(--input-bg)] text-brand-600 focus:ring-brand-500/40"
+            />
+            {t("planActive")}
+          </label>
+          {err && <FormMessage variant="error">{err}</FormMessage>}
+          <FormSubmit loading={loading}>
+            {loading ? t("planCreating") : t("planCreate")}
+          </FormSubmit>
+        </form>
+      </PanelSection>
+    </AdminPage>
+  );
+}
