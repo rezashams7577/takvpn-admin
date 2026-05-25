@@ -17,7 +17,7 @@ export function AdminListShell({ loading, error, empty, children }: Props) {
     return <p className="mt-6 text-sm text-[var(--muted)]">{t("loading")}</p>;
   }
   if (error) {
-    return <p className="mt-4 text-sm text-red-600">{error}</p>;
+    return <p className="mt-4 text-sm text-[var(--danger)]">{error}</p>;
   }
   if (empty) {
     return <p className="mt-6 text-sm text-[var(--muted)]">{t("noRecords")}</p>;

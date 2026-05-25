@@ -131,6 +131,7 @@
     "noAccount": "No account?",
     "hasAccount": "Already have an account?",
     "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid email or password",
     "registerFailed": "Registration failed",
     "loading": "Loading…"
   },

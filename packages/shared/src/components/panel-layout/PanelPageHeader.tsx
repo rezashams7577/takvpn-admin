@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
+
 type Props = {
   title: string;
-  description?: string;
+  description?: ReactNode;
 };
 
 export function PanelPageHeader({ title, description }: Props) {

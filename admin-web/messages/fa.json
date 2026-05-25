@@ -131,6 +131,7 @@
     "noAccount": "حساب ندارید؟",
     "hasAccount": "قبلاً ثبت‌نام کرده‌اید؟",
     "loginFailed": "ورود ناموفق بود",
+    "invalidCredentials": "ایمیل یا رمز عبور نادرست است",
     "registerFailed": "ثبت‌نام ناموفق بود",
     "loading": "در حال بارگذاری…"
   },

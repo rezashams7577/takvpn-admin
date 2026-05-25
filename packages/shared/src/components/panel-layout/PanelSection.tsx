@@ -17,7 +17,7 @@ export function PanelSection({
 }: Props) {
   const borderClass =
     variant === "danger"
-      ? "border-red-200 dark:border-red-900/50"
+      ? "border-[var(--danger-border)]"
       : "border-[var(--border)]";
 
   return (

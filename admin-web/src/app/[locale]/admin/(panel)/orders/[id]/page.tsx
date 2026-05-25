@@ -5,9 +5,7 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { formatWalletBalance } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
-import { AdminBackLink } from "@/components/admin/AdminBackLink";
-import { AdminMetaGrid } from "@/components/admin/AdminMetaGrid";
-import { AdminPage } from "@/components/admin/AdminPage";
+import { AdminBackLink, AdminButton, AdminMetaGrid, AdminPage } from "@/components/admin";
 import { useAdminRole } from "@/components/admin/AdminRoleContext";
 import { PanelActionRow, PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage } from "@/components/forms";
@@ -56,7 +54,7 @@ export default function AdminOrderDetailPage() {
   }
 
   if (loading) return <p className="text-[var(--muted)]">{t("loading")}</p>;
-  if (loadErr && !data) return <p className="text-red-600 text-sm">{loadErr}</p>;
+  if (loadErr && !data) return <p className="text-sm text-[var(--danger)]">{loadErr}</p>;
   if (!data) return <p className="text-[var(--muted)]">{t("noRecords")}</p>;
 
   const { order, vpn_service: vpn } = data;
@@ -74,11 +72,19 @@ export default function AdminOrderDetailPage() {
     { label: t("labelStatus"), value: order.status },
     {
       label: t("labelAmount"),
-      value: `${formatWalletBalance(order.amount, order.currency, locale)} ${order.currency}`,
+      value: (
+        <span dir="ltr" className="inline-block tabular-nums">
+          {formatWalletBalance(order.amount, order.currency, locale)} {order.currency}
+        </span>
+      ),
     },
     {
       label: t("labelCreated"),
-      value: new Date(order.created_at).toLocaleString(),
+      value: (
+        <span dir="ltr" className="inline-block">
+          {new Date(order.created_at).toLocaleString()}
+        </span>
+      ),
     },
   ];
 
@@ -94,7 +100,9 @@ export default function AdminOrderDetailPage() {
               {
                 label: t("publicKey"),
                 value: (
-                  <span className="font-mono text-xs break-all">{vpn.public_key}</span>
+                  <span dir="ltr" className="font-mono text-xs break-all inline-block">
+                    {vpn.public_key}
+                  </span>
                 ),
                 className: "sm:col-span-2",
               },
@@ -125,13 +133,9 @@ export default function AdminOrderDetailPage() {
                   title={t("reprovisionTitle")}
                   description={t("reprovisionDesc")}
                   action={
-                    <button
-                      type="button"
-                      onClick={() => reprovision(vpn)}
-                      className="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700"
-                    >
+                    <AdminButton type="button" onClick={() => reprovision(vpn)}>
                       {t("reprovision")}
-                    </button>
+                    </AdminButton>
                   }
                 />
                 {reprovisionMsg && (

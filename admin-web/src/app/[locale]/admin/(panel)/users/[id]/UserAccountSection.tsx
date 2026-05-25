@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { AdminButton } from "@/components/admin";
 import { PanelActionRow, PanelSection } from "@/components/layout";
 import { FormMessage } from "@/components/forms";
 import { adminPatchCustomer } from "@/lib/admin-api";
@@ -51,41 +51,34 @@ export function UserAccountSection({
       description={t("userAccountSectionDesc")}
       variant="danger"
     >
-      <div className="-mt-4">
+      <PanelActionRow
+        variant="danger"
+        title={isActive ? t("userSuspendTitle") : t("userActivateTitle")}
+        description={isActive ? t("userSuspendDesc") : t("userActivateDesc")}
+        action={
+          <AdminButton
+            variant={isActive ? "danger" : "secondary"}
+            onClick={toggleStatus}
+            disabled={loading}
+          >
+            {isActive ? t("userSuspendButton") : t("userActivateButton")}
+          </AdminButton>
+        }
+      />
+      {canViewAudit && (
         <PanelActionRow
-          variant="danger"
-          title={isActive ? t("userSuspendTitle") : t("userActivateTitle")}
-          description={isActive ? t("userSuspendDesc") : t("userActivateDesc")}
+          title={t("userAuditWalletTitle")}
+          description={t("userAuditWalletDesc")}
           action={
-            <button
-              type="button"
-              onClick={toggleStatus}
-              disabled={loading}
-              className={`rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 ${
-                isActive
-                  ? "border border-red-300 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  : "border border-[var(--border)] hover:bg-brand-50 dark:hover:bg-brand-900/30"
-              }`}
+            <AdminButton
+              variant="secondary"
+              href={`/admin/audit?action=wallet.adjustment&entity_id=${customerId}&entity_type=customer`}
             >
-              {isActive ? t("userSuspendButton") : t("userActivateButton")}
-            </button>
+              {t("auditFilterWallet")}
+            </AdminButton>
           }
         />
-        {canViewAudit && (
-          <PanelActionRow
-            title={t("userAuditWalletTitle")}
-            description={t("userAuditWalletDesc")}
-            action={
-              <Link
-                href={`/admin/audit?action=wallet.adjustment&entity_id=${customerId}&entity_type=customer`}
-                className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/30"
-              >
-                {t("auditFilterWallet")}
-              </Link>
-            }
-          />
-        )}
-      </div>
+      )}
       {msg && <FormMessage variant="success" className="mt-3">{msg}</FormMessage>}
       {err && <FormMessage variant="error" className="mt-2">{err}</FormMessage>}
     </PanelSection>

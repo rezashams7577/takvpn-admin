@@ -35,9 +35,11 @@ export function UserOrdersSection({ orders }: Props) {
                 #{o.id}
               </Link>{" "}
               — {o.status} —{" "}
-              {o.currency
-                ? `${formatWalletBalance(o.amount, o.currency, locale)} ${o.currency}`
-                : o.amount}
+              <span dir="ltr" className="inline-block tabular-nums">
+                {o.currency
+                  ? `${formatWalletBalance(o.amount, o.currency, locale)} ${o.currency}`
+                  : o.amount}
+              </span>
             </li>
           ))
         )}

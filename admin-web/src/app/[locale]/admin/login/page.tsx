@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { FormField, FormMessage, FormSubmit } from "@/components/forms";
 import { tryRefreshSession } from "@takvpn/shared/lib/auth-session";
-import { login } from "@/lib/api";
+import { login, mapApiError } from "@/lib/api";
 import { isStaffRole } from "@/lib/admin-api";
 
 export default function AdminLoginPage() {
@@ -67,7 +67,7 @@ function AdminLoginForm() {
       router.push(dest as "/admin");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : tAuth("loginFailed"));
+      setError(mapApiError(tAuth, err) || tAuth("loginFailed"));
     } finally {
       setLoading(false);
     }

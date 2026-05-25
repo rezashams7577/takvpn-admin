@@ -3,12 +3,20 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { AdminListShell } from "@/components/admin/AdminListShell";
+import {
+  AdminButton,
+  AdminDataTable,
+  AdminListShell,
+  AdminPage,
+  AdminTableBody,
+  AdminTableHead,
+  AdminTableRow,
+  AdminTableTd,
+  AdminTableTh,
+} from "@/components/admin";
+import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { adminListPlans, type AdminPlan } from "@/lib/admin-api";
 import { formatIrr, formatUsdt } from "@/lib/format";
-
-const thClass = "py-2 px-4 font-medium text-start whitespace-nowrap";
-const tdClass = "py-3 px-4 text-start align-middle";
 
 export default function AdminPlansPage() {
   const t = useTranslations("adminPanel");
@@ -24,50 +32,43 @@ export default function AdminPlansPage() {
   }, []);
 
   return (
-    <div>
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{t("plans")}</h1>
-        <Link
-          href="/admin/plans/new"
-          className="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium hover:bg-brand-700"
-        >
-          New plan
-        </Link>
+    <AdminPage className="max-w-5xl">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <PanelPageHeader title={t("plans")} />
+        <AdminButton href="/admin/plans/new">New plan</AdminButton>
       </div>
-      <AdminListShell loading={loading} error={err} empty={!loading && !err && plans.length === 0}>
-        <div className="mt-6 overflow-x-auto rounded-xl border border-[var(--border)]" dir="ltr">
-          <table className="w-full min-w-[720px] text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-[var(--border)] bg-[var(--card)] text-[var(--muted)]">
-                <th className={thClass}>Name</th>
-                <th className={thClass}>Slug</th>
-                <th className={`${thClass} tabular-nums`}>USDT</th>
-                <th className={`${thClass} tabular-nums`}>IRR</th>
-                <th className={`${thClass} tabular-nums`}>Days</th>
-                <th className={thClass}>Active</th>
-                <th className={thClass}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+      <PanelSection title={t("plans")}>
+        <AdminListShell loading={loading} error={err} empty={!loading && !err && plans.length === 0}>
+          <AdminDataTable minWidth="720px">
+            <AdminTableHead>
+              <AdminTableTh>Name</AdminTableTh>
+              <AdminTableTh>Slug</AdminTableTh>
+              <AdminTableTh className="tabular-nums">USDT</AdminTableTh>
+              <AdminTableTh className="tabular-nums">IRR</AdminTableTh>
+              <AdminTableTh className="tabular-nums">Days</AdminTableTh>
+              <AdminTableTh>Active</AdminTableTh>
+              <AdminTableTh>Actions</AdminTableTh>
+            </AdminTableHead>
+            <AdminTableBody>
               {plans.map((p) => (
-                <tr key={p.id} className="border-b border-[var(--border)] last:border-0">
-                  <td className={tdClass}>{p.name}</td>
-                  <td className={`${tdClass} font-mono text-xs text-[var(--muted)]`}>{p.slug}</td>
-                  <td className={`${tdClass} tabular-nums`}>{formatUsdt(p.price_usdt)}</td>
-                  <td className={`${tdClass} tabular-nums`}>{formatIrr(p.price_irr, "en")}</td>
-                  <td className={`${tdClass} tabular-nums`}>{p.duration_days}</td>
-                  <td className={tdClass}>{p.is_active ? "Yes" : "No"}</td>
-                  <td className={tdClass}>
+                <AdminTableRow key={p.id}>
+                  <AdminTableTd>{p.name}</AdminTableTd>
+                  <AdminTableTd className="font-mono text-xs text-[var(--muted)]">{p.slug}</AdminTableTd>
+                  <AdminTableTd className="tabular-nums">{formatUsdt(p.price_usdt)}</AdminTableTd>
+                  <AdminTableTd className="tabular-nums">{formatIrr(p.price_irr, "en")}</AdminTableTd>
+                  <AdminTableTd className="tabular-nums">{p.duration_days}</AdminTableTd>
+                  <AdminTableTd>{p.is_active ? "Yes" : "No"}</AdminTableTd>
+                  <AdminTableTd>
                     <Link href={`/admin/plans/${p.id}/edit`} className="text-brand-600 hover:underline">
                       Edit
                     </Link>
-                  </td>
-                </tr>
+                  </AdminTableTd>
+                </AdminTableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </AdminListShell>
-    </div>
+            </AdminTableBody>
+          </AdminDataTable>
+        </AdminListShell>
+      </PanelSection>
+    </AdminPage>
   );
 }

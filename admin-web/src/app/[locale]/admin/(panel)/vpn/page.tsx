@@ -3,7 +3,19 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { AdminListShell } from "@/components/admin/AdminListShell";
+import {
+  AdminButton,
+  AdminDataTable,
+  AdminListShell,
+  AdminPage,
+  AdminTableBody,
+  AdminTableHead,
+  AdminTableRow,
+  AdminTableTd,
+  AdminTableTh,
+} from "@/components/admin";
+import { PanelPageHeader, PanelSection } from "@/components/layout";
+import { FormMessage } from "@/components/forms";
 import { useAdminRole } from "@/components/admin/AdminRoleContext";
 import { adminListVPN, adminReprovisionVPN, type VPNServiceAdmin } from "@/lib/admin-api";
 
@@ -42,79 +54,83 @@ export default function AdminVPNPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">{t("vpn")}</h1>
-      <select
-        value={status}
-        onChange={(e) => setStatus(e.target.value)}
-        className="admin-select mt-4"
-      >
-        <option value="">All statuses</option>
-        <option value="provisioning">Provisioning</option>
-        <option value="active">Active</option>
-        <option value="failed">Failed</option>
-        <option value="expired">Expired</option>
-      </select>
-      {msg && <p className="mt-4 text-sm text-green-600">{msg}</p>}
-      {actionErr && <p className="mt-2 text-sm text-red-600">{actionErr}</p>}
-      <AdminListShell
-        loading={loading}
-        error={loadErr}
-        empty={!loading && !loadErr && list.length === 0}
-      >
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
-            <thead>
-              <tr className="border-b text-left text-[var(--muted)]">
-                <th className="py-2 pr-4">ID</th>
-                <th className="py-2 pr-4">Customer</th>
-                <th className="py-2 pr-4">Order</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2 pr-4">{t("comment")}</th>
-                <th className="py-2 pr-4">{t("publicKey")}</th>
-                <th className="py-2 pr-4">Expires</th>
-                <th className="py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+    <AdminPage className="max-w-6xl">
+      <PanelPageHeader title={t("vpn")} />
+      <PanelSection title={t("vpn")}>
+        <div className="admin-form max-w-xs mb-4" dir="ltr">
+          <label className="admin-field-label">Status filter</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="admin-select w-full"
+          >
+            <option value="">All statuses</option>
+            <option value="provisioning">Provisioning</option>
+            <option value="active">Active</option>
+            <option value="failed">Failed</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+        {msg && <FormMessage variant="success" className="mb-2">{msg}</FormMessage>}
+        {actionErr && <FormMessage variant="error" className="mb-2">{actionErr}</FormMessage>}
+        <AdminListShell
+          loading={loading}
+          error={loadErr}
+          empty={!loading && !loadErr && list.length === 0}
+        >
+          <AdminDataTable minWidth="800px">
+            <AdminTableHead>
+              <AdminTableTh>ID</AdminTableTh>
+              <AdminTableTh>Customer</AdminTableTh>
+              <AdminTableTh>Order</AdminTableTh>
+              <AdminTableTh>Status</AdminTableTh>
+              <AdminTableTh>{t("comment")}</AdminTableTh>
+              <AdminTableTh>{t("publicKey")}</AdminTableTh>
+              <AdminTableTh>Expires</AdminTableTh>
+              <AdminTableTh>Actions</AdminTableTh>
+            </AdminTableHead>
+            <AdminTableBody>
               {list.map((v) => (
-                <tr key={v.id} className="border-b border-[var(--border)]">
-                  <td className="py-3 pr-4">{v.id}</td>
-                  <td className="py-3 pr-4">
+                <AdminTableRow key={v.id}>
+                  <AdminTableTd>{v.id}</AdminTableTd>
+                  <AdminTableTd>
                     <Link href={`/admin/users/${v.customer_id}`} className="text-brand-600">
                       {v.customer_email || v.customer_id}
                     </Link>
-                  </td>
-                  <td className="py-3 pr-4">
+                  </AdminTableTd>
+                  <AdminTableTd>
                     <Link href={`/admin/orders/${v.order_id}`} className="text-brand-600">
                       #{v.order_id}
                     </Link>
-                  </td>
-                  <td className="py-3 pr-4">{v.status}</td>
-                  <td className="py-3 pr-4 max-w-[120px] truncate" title={v.comment}>
+                  </AdminTableTd>
+                  <AdminTableTd>{v.status}</AdminTableTd>
+                  <AdminTableTd className="max-w-[120px] truncate" title={v.comment}>
                     {v.comment || "—"}
-                  </td>
-                  <td className="py-3 pr-4 font-mono text-xs max-w-[140px] truncate" title={v.public_key}>
-                    {v.public_key ? `${v.public_key.slice(0, 12)}…` : "—"}
-                  </td>
-                  <td className="py-3 pr-4">{v.expires_at || "—"}</td>
-                  <td className="py-3">
+                  </AdminTableTd>
+                  <AdminTableTd className="max-w-[140px] truncate" title={v.public_key}>
+                    <span dir="ltr" className="font-mono text-xs inline-block">
+                      {v.public_key ? `${v.public_key.slice(0, 12)}…` : "—"}
+                    </span>
+                  </AdminTableTd>
+                  <AdminTableTd>
+                    <span dir="ltr" className="inline-block whitespace-nowrap">
+                      {v.expires_at || "—"}
+                    </span>
+                  </AdminTableTd>
+                  <AdminTableTd>
                     {canReprovision &&
                       (v.status === "failed" || v.status === "provisioning") && (
-                        <button
-                          onClick={() => reprovision(v.id)}
-                          className="text-sm text-brand-600"
-                        >
+                        <AdminButton variant="ghost" onClick={() => reprovision(v.id)}>
                           {t("reprovision")}
-                        </button>
+                        </AdminButton>
                       )}
-                  </td>
-                </tr>
+                  </AdminTableTd>
+                </AdminTableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </AdminListShell>
-    </div>
+            </AdminTableBody>
+          </AdminDataTable>
+        </AdminListShell>
+      </PanelSection>
+    </AdminPage>
   );
 }

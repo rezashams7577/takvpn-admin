@@ -15,9 +15,9 @@ export function FormMessage({
 }: FormMessageProps) {
   const color =
     variant === "success"
-      ? "text-green-600"
+      ? "text-[var(--success)]"
       : variant === "info"
         ? "text-brand-600"
-        : "text-red-600";
+        : "text-[var(--danger)]";
   return <p className={`text-sm ${color} ${className}`.trim()}>{children}</p>;
 }

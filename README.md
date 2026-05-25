@@ -14,6 +14,8 @@ Standalone Next.js admin UI for TakVPN staff.
 ```
 packages/shared/   # Shared forms, theme CSS, API helpers
 admin-web/         # Next.js admin app
+docs/theme.md      # UI theme conventions (tokens, layout, RTL)
+scripts/check-theme.sh  # Lint styling drift in admin-web
 ```
 
 ## Local development

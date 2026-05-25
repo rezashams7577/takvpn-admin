@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AdminField } from "@/components/admin/AdminField";
+import { AdminField, AdminPage } from "@/components/admin";
+import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSelect, FormSubmit } from "@/components/forms";
 import { adminCreateStaff } from "@/lib/admin-api";
 
@@ -35,9 +36,10 @@ export default function CreateStaffPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">{t("createStaffTitle")}</h1>
-      <form onSubmit={onSubmit} className="admin-form mt-6 max-w-md space-y-3" dir="ltr">
+    <AdminPage>
+      <PanelPageHeader title={t("createStaffTitle")} />
+      <PanelSection title={t("createStaffTitle")}>
+      <form onSubmit={onSubmit} className="admin-form max-w-md space-y-3" dir="ltr">
         <AdminField label={t("staffEmail")} name="email" type="email" required />
         <AdminField
           label={t("staffPassword")}
@@ -72,6 +74,7 @@ export default function CreateStaffPage() {
           {loading ? t("loading") : t("createStaff")}
         </FormSubmit>
       </form>
-    </div>
+      </PanelSection>
+    </AdminPage>
   );
 }

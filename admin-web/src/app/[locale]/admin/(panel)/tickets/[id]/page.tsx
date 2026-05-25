@@ -5,6 +5,11 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
+  AdminButton,
+  AdminPage,
+} from "@/components/admin";
+import { PanelPageHeader, PanelSection } from "@/components/layout";
+import {
   FormField,
   FormFile,
   FormMessage,
@@ -204,110 +209,109 @@ export default function AdminTicketThreadPage() {
   const otherName =
     ticket.claimed_by_name || ticket.claimed_by_email || `#${ticket.claimed_by}`;
 
+  const connectionColor = connected
+    ? "text-[var(--success)]"
+    : connectionFailed
+      ? "text-[var(--danger)]"
+      : "text-[var(--warning)]";
+
   return (
-    <div className="space-y-6">
-      <div>
-        <Link href="/admin/tickets" className="text-sm text-brand-600">
-          {t("ticketBack")}
-        </Link>
-        <h1 className="text-2xl font-bold mt-2">{ticket.subject}</h1>
-        <p className="text-sm text-[var(--muted)]">
-          #{ticket.id} ·{" "}
-          <Link href={`/admin/users/${ticket.customer_id}`} className="text-brand-600">
-            {ticket.customer_email}
-          </Link>
-          {" · "}
-          <span
-            className={
-              connected
-                ? "text-green-600"
+    <AdminPage className="max-w-4xl">
+      <Link href="/admin/tickets" className="text-sm text-brand-600">
+        {t("ticketBack")}
+      </Link>
+      <PanelPageHeader
+        title={ticket.subject}
+        description={
+          <>
+            #{ticket.id} ·{" "}
+            <Link href={`/admin/users/${ticket.customer_id}`} className="text-brand-600">
+              {ticket.customer_email}
+            </Link>
+            {" · "}
+            <span className={connectionColor}>
+              {connected
+                ? t("ticketConnected")
                 : connectionFailed
-                  ? "text-red-600"
-                  : "text-amber-600"
-            }
-          >
-            {connected
-              ? t("ticketConnected")
-              : connectionFailed
-                ? t("ticketWsFailed")
-                : t("ticketDisconnected")}
-          </span>
-        </p>
-        {connectionFailed && (
-          <p className="text-xs text-amber-600 mt-1">{t("ticketWsFallbackHint")}</p>
+                  ? t("ticketWsFailed")
+                  : t("ticketDisconnected")}
+            </span>
+          </>
+        }
+      />
+
+      {connectionFailed && (
+        <p className="text-xs text-[var(--warning)]">{t("ticketWsFallbackHint")}</p>
+      )}
+
+      <PanelSection title={t("tickets")}>
+        {ticket.status === "open" && (
+          <AdminButton onClick={onClaim} disabled={claiming}>
+            {claiming ? t("ticketClaiming") : t("ticketClaim")}
+          </AdminButton>
         )}
-      </div>
+        {claimedByOther && (
+          <p className="text-sm text-[var(--warning)]">
+            {t("ticketClaimedByOther", { name: otherName })}
+          </p>
+        )}
+        {canReply && (
+          <p className="text-sm text-[var(--success)]">{t("ticketClaimedByYou")}</p>
+        )}
 
-      {ticket.status === "open" && (
-        <button
-          type="button"
-          onClick={onClaim}
-          disabled={claiming}
-          className="rounded-lg bg-brand-600 text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
-        >
-          {claiming ? t("ticketClaiming") : t("ticketClaim")}
-        </button>
-      )}
-      {claimedByOther && (
-        <p className="text-sm text-amber-700 dark:text-amber-400">
-          {t("ticketClaimedByOther", { name: otherName })}
-        </p>
-      )}
-      {canReply && (
-        <p className="text-sm text-green-700 dark:text-green-400">{t("ticketClaimedByYou")}</p>
-      )}
-
-      <div className="space-y-3 max-h-[28rem] overflow-y-auto rounded-xl border border-[var(--border)] p-4 bg-[var(--card)]">
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`text-sm rounded-lg px-3 py-2 max-w-[85%] ${
-              m.sender_role === "staff"
-                ? "ml-auto bg-brand-600 text-white"
-                : "mr-auto bg-[var(--border)]"
-            }`}
-          >
-            {m.body && <p className="whitespace-pre-wrap">{m.body}</p>}
-            {m.has_attachment && (
-              <a
-                href={ticketAttachmentUrl(ticketId, m.id, true)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline text-xs mt-1 block"
-              >
-                {m.attachment_name || "Attachment"}
-              </a>
-            )}
-            <p className="text-[10px] opacity-70 mt-1">
-              {m.sender_email} · {new Date(m.created_at).toLocaleString()}
-            </p>
-          </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
-
-      {ticket.status !== "closed" && (
-        <form onSubmit={onReply} className="admin-form max-w-xl space-y-3">
-          {!canReply && ticket.status !== "open" && (
-            <p className="text-sm text-[var(--muted)]">{t("ticketMustClaim")}</p>
-          )}
-          <FormField name="body" label={t("ticketMessage")} multiline />
-          <FormFile name="attachment" label={t("ticketAttachment")} accept="image/*,.pdf" />
-          <FormMessage message={msg} error={err} />
-          <div className="flex flex-wrap gap-3">
-            <FormSubmit loading={submitting} disabled={!canReply}>
-              {t("ticketReply")}
-            </FormSubmit>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm"
+        <div className="mt-4 space-y-3 max-h-[28rem] overflow-y-auto rounded-xl border border-[var(--border)] p-4 bg-[var(--bg)]">
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={`text-sm rounded-lg px-3 py-2 max-w-[85%] ${
+                m.sender_role === "staff"
+                  ? "ms-auto bg-brand-600 text-white"
+                  : "me-auto bg-[var(--border)]"
+              }`}
             >
-              {t("ticketClose")}
-            </button>
-          </div>
-        </form>
-      )}
-    </div>
+              {m.body && <p className="whitespace-pre-wrap">{m.body}</p>}
+              {m.has_attachment && (
+                <a
+                  href={ticketAttachmentUrl(ticketId, m.id, true)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-xs mt-1 block"
+                >
+                  {m.attachment_name || "Attachment"}
+                </a>
+              )}
+              <p className="text-[10px] opacity-70 mt-1" dir="ltr">
+                {m.sender_email} · {new Date(m.created_at).toLocaleString()}
+              </p>
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+
+        {ticket.status !== "closed" && (
+          <form
+            onSubmit={onReply}
+            className="admin-form max-w-xl space-y-3 mt-6"
+            dir="ltr"
+          >
+            {!canReply && ticket.status !== "open" && (
+              <p className="text-sm text-[var(--muted)]">{t("ticketMustClaim")}</p>
+            )}
+            <FormField name="body" label={t("ticketMessage")} multiline />
+            <FormFile name="attachment" label={t("ticketAttachment")} accept="image/*,.pdf" />
+            {msg && <FormMessage variant="success">{msg}</FormMessage>}
+            {err && <FormMessage variant="error">{err}</FormMessage>}
+            <div className="flex flex-wrap gap-3">
+              <FormSubmit loading={submitting} disabled={!canReply}>
+                {t("ticketReply")}
+              </FormSubmit>
+              <AdminButton variant="secondary" type="button" onClick={onClose}>
+                {t("ticketClose")}
+              </AdminButton>
+            </div>
+          </form>
+        )}
+      </PanelSection>
+    </AdminPage>
   );
 }

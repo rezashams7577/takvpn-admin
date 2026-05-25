@@ -3,7 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { AdminListShell } from "@/components/admin/AdminListShell";
+import {
+  AdminButton,
+  AdminDataTable,
+  AdminListShell,
+  AdminPage,
+  AdminTableBody,
+  AdminTableHead,
+  AdminTableRow,
+  AdminTableTd,
+  AdminTableTh,
+} from "@/components/admin";
+import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { createTicketSocket } from "@/lib/ticket-socket";
 import { adminListTickets, type Ticket } from "@/lib/tickets";
 
@@ -61,80 +72,75 @@ export default function AdminTicketsPage() {
     { id: "all", label: t("ticketsAll") },
   ];
 
+  const connectionColor = connected
+    ? "text-[var(--success)]"
+    : connectionFailed
+      ? "text-[var(--danger)]"
+      : "text-[var(--warning)]";
+
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">{t("ticketsTitle")}</h1>
-        <span
-          className={`text-xs ${
-            connected
-              ? "text-green-600"
+    <AdminPage className="max-w-5xl">
+      <PanelPageHeader
+        title={t("ticketsTitle")}
+        description={
+          <span className={connectionColor}>
+            {connected
+              ? t("ticketConnected")
               : connectionFailed
-                ? "text-red-600"
-                : "text-amber-600"
-          }`}
-        >
-          {connected
-            ? t("ticketConnected")
-            : connectionFailed
-              ? t("ticketWsFailed")
-              : t("ticketDisconnected")}
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2 mt-4">
-        {tabs.map((x) => (
-          <button
-            key={x.id}
-            type="button"
-            onClick={() => setTab(x.id)}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              tab === x.id
-                ? "bg-brand-600 text-white"
-                : "border border-[var(--border)]"
-            }`}
-          >
-            {x.label}
-          </button>
-        ))}
-      </div>
-      <AdminListShell loading={loading} error={err} empty={!loading && !err && tickets.length === 0}>
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-[var(--muted)]">
-                <th className="py-2 pr-4">ID</th>
-                <th className="py-2 pr-4">{t("ticketCustomer")}</th>
-                <th className="py-2 pr-4">{t("ticketSubject")}</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2 pr-4">Updated</th>
-                <th className="py-2">{t("view")}</th>
-              </tr>
-            </thead>
-            <tbody>
+                ? t("ticketWsFailed")
+                : t("ticketDisconnected")}
+          </span>
+        }
+      />
+      <PanelSection title={t("ticketsTitle")}>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {tabs.map((x) => (
+            <AdminButton
+              key={x.id}
+              variant={tab === x.id ? "primary" : "secondary"}
+              onClick={() => setTab(x.id)}
+            >
+              {x.label}
+            </AdminButton>
+          ))}
+        </div>
+        <AdminListShell loading={loading} error={err} empty={!loading && !err && tickets.length === 0}>
+          <AdminDataTable>
+            <AdminTableHead>
+              <AdminTableTh>ID</AdminTableTh>
+              <AdminTableTh>{t("ticketCustomer")}</AdminTableTh>
+              <AdminTableTh>{t("ticketSubject")}</AdminTableTh>
+              <AdminTableTh>Status</AdminTableTh>
+              <AdminTableTh>Updated</AdminTableTh>
+              <AdminTableTh>{t("view")}</AdminTableTh>
+            </AdminTableHead>
+            <AdminTableBody>
               {tickets.map((tk) => (
-                <tr key={tk.id} className="border-b border-[var(--border)]">
-                  <td className="py-3 pr-4">#{tk.id}</td>
-                  <td className="py-3 pr-4">
+                <AdminTableRow key={tk.id}>
+                  <AdminTableTd>#{tk.id}</AdminTableTd>
+                  <AdminTableTd>
                     <Link href={`/admin/users/${tk.customer_id}`} className="text-brand-600">
                       {tk.customer_email}
                     </Link>
-                  </td>
-                  <td className="py-3 pr-4">{tk.subject}</td>
-                  <td className="py-3 pr-4">{tk.status}</td>
-                  <td className="py-3 pr-4">
-                    {new Date(tk.last_message_at).toLocaleString()}
-                  </td>
-                  <td className="py-3">
+                  </AdminTableTd>
+                  <AdminTableTd>{tk.subject}</AdminTableTd>
+                  <AdminTableTd>{tk.status}</AdminTableTd>
+                  <AdminTableTd>
+                    <span dir="ltr" className="inline-block whitespace-nowrap">
+                      {new Date(tk.last_message_at).toLocaleString()}
+                    </span>
+                  </AdminTableTd>
+                  <AdminTableTd>
                     <Link href={`/admin/tickets/${tk.id}`} className="text-brand-600">
                       {t("view")}
                     </Link>
-                  </td>
-                </tr>
+                  </AdminTableTd>
+                </AdminTableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </AdminListShell>
-    </div>
+            </AdminTableBody>
+          </AdminDataTable>
+        </AdminListShell>
+      </PanelSection>
+    </AdminPage>
   );
 }

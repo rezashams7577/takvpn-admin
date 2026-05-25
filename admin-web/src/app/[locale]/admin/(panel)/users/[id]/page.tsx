@@ -50,7 +50,7 @@ export default function AdminUserDetailPage() {
   }, [reload]);
 
   if (loading) return <p className="text-[var(--muted)]">{t("loading")}</p>;
-  if (!data) return <p className="text-red-600 text-sm">{loadErr || t("noRecords")}</p>;
+  if (!data) return <p className="text-sm text-[var(--danger)]">{loadErr || t("noRecords")}</p>;
 
   const email = String(data.email);
   const userRole = String(data.role);

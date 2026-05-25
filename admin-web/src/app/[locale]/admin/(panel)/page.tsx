@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AdminPage, AdminStatCard } from "@/components/admin";
+import { PanelPageHeader } from "@/components/layout";
 import { adminStats, type AdminStats } from "@/lib/admin-api";
 
 export default function AdminDashboardPage() {
@@ -13,7 +15,7 @@ export default function AdminDashboardPage() {
       .catch((e) => setErr(e instanceof Error ? e.message : "Failed"));
   }, []);
 
-  if (err) return <p className="text-red-600 text-sm">{err}</p>;
+  if (err) return <p className="text-sm text-[var(--danger)]">{err}</p>;
   if (!stats) return <p className="text-[var(--muted)]">Loading…</p>;
 
   const cards = [
@@ -24,19 +26,13 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <AdminPage className="max-w-5xl">
+      <PanelPageHeader title="Dashboard" />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((c) => (
-          <div
-            key={c.label}
-            className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6"
-          >
-            <p className="text-sm text-[var(--muted)]">{c.label}</p>
-            <p className="text-3xl font-bold mt-2">{c.value}</p>
-          </div>
+          <AdminStatCard key={c.label} label={c.label} value={c.value} />
         ))}
       </div>
-    </div>
+    </AdminPage>
   );
 }

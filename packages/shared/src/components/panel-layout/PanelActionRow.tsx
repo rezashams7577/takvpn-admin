@@ -14,22 +14,24 @@ export function PanelActionRow({
   variant = "default",
 }: Props) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4 first:pt-0 last:pb-0 border-b border-[var(--border)] last:border-b-0">
+    <div className="space-y-3 py-4 border-b border-[var(--border)] last:border-b-0">
       <div className="min-w-0">
         <p
           className={`text-sm font-medium ${
             variant === "danger"
-              ? "text-red-700 dark:text-red-400"
+              ? "text-[var(--danger-muted)]"
               : "text-[var(--fg)]"
           }`}
         >
           {title}
         </p>
         {description && (
-          <p className="text-xs text-[var(--muted)] mt-1">{description}</p>
+          <p className="text-xs text-[var(--muted)] mt-1 leading-relaxed">
+            {description}
+          </p>
         )}
       </div>
-      <div className="shrink-0">{action}</div>
+      <div>{action}</div>
     </div>
   );
 }

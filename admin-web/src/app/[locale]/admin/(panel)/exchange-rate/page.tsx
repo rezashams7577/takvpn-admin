@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { AdminPage } from "@/components/admin";
+import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormField, FormMessage, FormSubmit } from "@/components/forms";
 import { adminSetExchangeRate } from "@/lib/admin-api";
 import { fetchExchangeRate } from "@/lib/api";
@@ -47,14 +49,17 @@ export default function AdminExchangeRatePage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">{t("exchangeRateTitle")}</h1>
-      {current && (
-        <p className="text-sm text-[var(--muted)] mt-2">
-          {t("exchangeRateCurrent", { rate: formatExchangeRate(current) })}
-        </p>
-      )}
-      <form onSubmit={onSubmit} className="admin-form mt-6 max-w-sm space-y-3" dir="ltr">
+    <AdminPage>
+      <PanelPageHeader
+        title={t("exchangeRateTitle")}
+        description={
+          current
+            ? t("exchangeRateCurrent", { rate: formatExchangeRate(current) })
+            : undefined
+        }
+      />
+      <PanelSection title={t("exchangeRateTitle")}>
+      <form onSubmit={onSubmit} className="admin-form max-w-sm space-y-3" dir="ltr">
         <FormField
           label={t("exchangeRateLabel")}
           name="rate"
@@ -66,6 +71,7 @@ export default function AdminExchangeRatePage() {
         {err && <FormMessage variant="error">{err}</FormMessage>}
         <FormSubmit loading={loading}>{t("exchangeRateUpdate")}</FormSubmit>
       </form>
-    </div>
+      </PanelSection>
+    </AdminPage>
   );
 }

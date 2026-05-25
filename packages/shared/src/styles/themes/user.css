@@ -10,6 +10,14 @@
   --input-border: #d8e2ec;
   --focus-ring: #3b82f6;
   --focus-ring-shadow: rgb(59 130 246 / 0.25);
+  --success: #16a34a;
+  --success-muted: #15803d;
+  --danger: #dc2626;
+  --danger-muted: #b91c1c;
+  --danger-border: #fecaca;
+  --danger-bg: #fef2f2;
+  --warning: #d97706;
+  --warning-muted: #b45309;
 }
 
 .dark {
@@ -22,4 +30,12 @@
   --input-border: #475569;
   --focus-ring: #60a5fa;
   --focus-ring-shadow: rgb(96 165 250 / 0.2);
+  --success: #4ade80;
+  --success-muted: #86efac;
+  --danger: #f87171;
+  --danger-muted: #fca5a5;
+  --danger-border: rgb(127 29 29 / 0.5);
+  --danger-bg: rgb(127 29 29 / 0.2);
+  --warning: #fbbf24;
+  --warning-muted: #fcd34d;
 }

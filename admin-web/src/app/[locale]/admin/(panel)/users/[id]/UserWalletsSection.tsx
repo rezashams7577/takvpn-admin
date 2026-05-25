@@ -66,13 +66,15 @@ export function UserWalletsSection({
       title={t("userWalletsSection")}
       description={t("userWalletsSectionDesc")}
     >
-      <ul className="space-y-1 text-sm">
+      <ul className="space-y-2 text-sm">
         {wallets.length === 0 ? (
           <li className="text-[var(--muted)]">{t("noRecords")}</li>
         ) : (
           wallets.map((w, i) => (
-            <li key={i}>
-              {w.currency}: {formatWalletBalance(w.balance, w.currency, locale)}
+            <li key={i} className="text-start">
+              <span dir="ltr" className="inline-block font-medium tabular-nums">
+                {w.currency}: {formatWalletBalance(w.balance, w.currency, locale)}
+              </span>
             </li>
           ))
         )}

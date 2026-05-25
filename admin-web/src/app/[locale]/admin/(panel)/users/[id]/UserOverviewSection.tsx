@@ -27,7 +27,11 @@ export function UserOverviewSection({ email, role, status, name, createdAt }: Pr
   if (createdAt) {
     items.push({
       label: t("labelCreated"),
-      value: new Date(createdAt).toLocaleString(),
+      value: (
+        <span dir="ltr" className="inline-block">
+          {new Date(createdAt).toLocaleString()}
+        </span>
+      ),
     });
   }
 

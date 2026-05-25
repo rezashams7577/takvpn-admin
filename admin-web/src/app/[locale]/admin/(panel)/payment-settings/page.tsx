@@ -70,7 +70,7 @@ export default function AdminPaymentSettingsPage() {
         description={t("paymentSettingsHint")}
       />
 
-      {loadErr && <p className="text-sm text-red-600">{loadErr}</p>}
+      {loadErr && <p className="text-sm text-[var(--danger)]">{loadErr}</p>}
 
       {settings && (
         <PanelSection

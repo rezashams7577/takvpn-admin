@@ -5,7 +5,10 @@ import sharedPreset from "@takvpn/shared/tailwind-preset";
 const config: Config = {
   presets: [sharedPreset as Config],
   plugins: [typography],
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "../packages/shared/src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
       colors: {

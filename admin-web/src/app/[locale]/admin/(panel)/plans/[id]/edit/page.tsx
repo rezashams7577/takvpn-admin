@@ -53,7 +53,7 @@ export default function EditPlanPage() {
   }
 
   if (!plan && !loadErr) return <p className="text-[var(--muted)]">{t("loading")}</p>;
-  if (!plan) return <p className="text-red-600 text-sm">{loadErr}</p>;
+  if (!plan) return <p className="text-sm text-[var(--danger)]">{loadErr}</p>;
 
   return (
     <AdminPage>
