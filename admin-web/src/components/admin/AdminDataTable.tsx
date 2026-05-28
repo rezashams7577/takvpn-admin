@@ -73,9 +73,15 @@ export function AdminTableRow({
 export function AdminTableTd({
   children,
   className = "",
+  title,
 }: {
   children: ReactNode;
   className?: string;
+  title?: string;
 }) {
-  return <td className={`px-4 py-3 text-start ${className}`.trim()}>{children}</td>;
+  return (
+    <td title={title} className={`px-4 py-3 text-start ${className}`.trim()}>
+      {children}
+    </td>
+  );
 }

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { AdminBackLink } from "@/components/admin/AdminBackLink";
-import { AdminMetaGrid } from "@/components/admin/AdminMetaGrid";
+import { AdminMetaGrid, type AdminMetaItem } from "@/components/admin/AdminMetaGrid";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
 export function UserOverviewSection({ email, role, status, name, createdAt }: Props) {
   const t = useTranslations("adminPanel");
 
-  const items = [
+  const items: AdminMetaItem[] = [
     { label: t("labelRole"), value: role },
     { label: t("labelStatus"), value: status },
   ];

@@ -119,6 +119,7 @@ export type AuditLogEntry = {
   action: string;
   entity_type?: string;
   entity_id?: number;
+  meta?: string | Record<string, unknown> | null;
   ip_address?: string;
   created_at: string;
 };

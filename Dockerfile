@@ -8,6 +8,9 @@ WORKDIR /app
 COPY packages/shared/package.json packages/shared/
 COPY admin-web/package.json admin-web/package-lock.json* admin-web/.npmrc* ./admin-web/
 COPY packages/shared ./packages/shared
+WORKDIR /app/packages/shared
+RUN npm config set registry "${NPM_REGISTRY}" \
+    && npm install
 WORKDIR /app/admin-web
 RUN npm config set registry "${NPM_REGISTRY}" \
     && npm install
@@ -15,6 +18,7 @@ RUN npm config set registry "${NPM_REGISTRY}" \
 FROM ${REGISTRY}/node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/admin-web/node_modules ./admin-web/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY --from=deps /app/packages/shared ./packages/shared
 COPY admin-web ./admin-web
 WORKDIR /app/admin-web
@@ -34,11 +38,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
-COPY --from=builder /app/admin-web/public ./public
+COPY --from=builder /app/admin-web/public ./admin-web/public
 COPY --from=builder --chown=nextjs:nodejs /app/admin-web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/admin-web/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/admin-web/.next/static ./admin-web/.next/static
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-CMD ["node", "server.js"]
+CMD ["node", "admin-web/server.js"]
