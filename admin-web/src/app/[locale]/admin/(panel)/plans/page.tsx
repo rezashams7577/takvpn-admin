@@ -14,19 +14,20 @@ import {
   AdminTableTd,
   AdminTableTh,
 } from "@/components/admin";
+import { useConfirmDialog } from "@/components/useConfirmDialog";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import {
-  adminDeletePlan,
   adminGetPaymentSettings,
   adminListPlans,
-  PlanHasOrdersError,
   type AdminPlan,
   type PaymentSettings,
 } from "@/lib/admin-api";
+import { deletePlanWithConfirm } from "@/lib/delete-plan-with-confirm";
 import { formatIrr, formatUsdt } from "@/lib/format";
 
 export default function AdminPlansPage() {
   const t = useTranslations("adminPanel");
+  const { ask, ConfirmDialog } = useConfirmDialog();
   const [plans, setPlans] = useState<AdminPlan[]>([]);
   const [payment, setPayment] = useState<PaymentSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,33 +35,13 @@ export default function AdminPlansPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   async function handleDelete(p: AdminPlan) {
-    if (!window.confirm(t("planDeleteConfirm", { name: p.name }))) return;
     setDeletingId(p.id);
     setErr("");
-    try {
-      await adminDeletePlan(p.id);
-      setPlans((prev) => prev.filter((x) => x.id !== p.id));
-    } catch (e) {
-      if (e instanceof PlanHasOrdersError) {
-        if (
-          !window.confirm(
-            t("planDeleteCascadeConfirm", { name: p.name, count: e.orderCount })
-          )
-        ) {
-          return;
-        }
-        try {
-          await adminDeletePlan(p.id, true);
-          setPlans((prev) => prev.filter((x) => x.id !== p.id));
-        } catch (e2) {
-          setErr(e2 instanceof Error ? e2.message : t("failed"));
-        }
-        return;
-      }
-      setErr(e instanceof Error ? e.message : t("failed"));
-    } finally {
-      setDeletingId(null);
-    }
+    await deletePlanWithConfirm(p, ask, t, {
+      onDeleted: () => setPlans((prev) => prev.filter((x) => x.id !== p.id)),
+      onError: setErr,
+    });
+    setDeletingId(null);
   }
 
   useEffect(() => {
@@ -78,6 +59,7 @@ export default function AdminPlansPage() {
 
   return (
     <AdminPage className="max-w-5xl">
+      <ConfirmDialog />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <PanelPageHeader title={t("plans")} />
         <AdminButton href="/admin/plans/new">New plan</AdminButton>
@@ -91,6 +73,7 @@ export default function AdminPlansPage() {
               {showUsdt && <AdminTableTh className="tabular-nums">USDT</AdminTableTh>}
               {showToman && <AdminTableTh className="tabular-nums">IRR</AdminTableTh>}
               <AdminTableTh className="tabular-nums">Days</AdminTableTh>
+              <AdminTableTh className="tabular-nums">{t("planMaxDevices")}</AdminTableTh>
               <AdminTableTh>Active</AdminTableTh>
               <AdminTableTh>Actions</AdminTableTh>
             </AdminTableHead>
@@ -108,6 +91,7 @@ export default function AdminPlansPage() {
                   <AdminTableTd className="tabular-nums">
                     {p.duration_days != null ? p.duration_days : t("planDurationUnlimited")}
                   </AdminTableTd>
+                  <AdminTableTd className="tabular-nums">{p.max_devices ?? 1}</AdminTableTd>
                   <AdminTableTd>{p.is_active ? "Yes" : "No"}</AdminTableTd>
                   <AdminTableTd>
                     <div className="flex flex-wrap items-center gap-3">
@@ -119,7 +103,7 @@ export default function AdminPlansPage() {
                         variant="danger"
                         className="px-2 py-1 text-xs"
                         disabled={deletingId === p.id}
-                        onClick={() => handleDelete(p)}
+                        onClick={() => void handleDelete(p)}
                       >
                         {deletingId === p.id ? t("planDeleting") : t("planDelete")}
                       </AdminButton>

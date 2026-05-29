@@ -9,22 +9,23 @@ import { AdminPage } from "@/components/admin/AdminPage";
 import { AdminField } from "@/components/admin/AdminField";
 import { PlanDurationFields, planDurationFromForm } from "@/components/admin/PlanDurationFields";
 import { PlanTrafficFields, planTrafficFromForm } from "@/components/admin/PlanTrafficFields";
+import { useConfirmDialog } from "@/components/useConfirmDialog";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSubmit } from "@/components/forms";
 import {
-  adminDeletePlan,
   adminGetPaymentSettings,
   adminGetPlan,
   adminUpdatePlan,
-  PlanHasOrdersError,
   type PaymentSettings,
 } from "@/lib/admin-api";
+import { deletePlanWithConfirm } from "@/lib/delete-plan-with-confirm";
 import { formatUsdt } from "@/lib/format";
 
 export default function EditPlanPage() {
   const { id } = useParams();
   const t = useTranslations("adminPanel");
   const router = useRouter();
+  const { ask, ConfirmDialog } = useConfirmDialog();
   const [err, setErr] = useState("");
   const [loadErr, setLoadErr] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,31 +41,19 @@ export default function EditPlanPage() {
   }, [id, t]);
 
   async function onDelete() {
-    if (!plan || !window.confirm(t("planDeleteConfirm", { name: String(plan.name) }))) return;
+    if (!plan) return;
     setDeleting(true);
     setErr("");
-    const planName = String(plan.name);
-    const planId = Number(id);
-    try {
-      await adminDeletePlan(planId);
-      router.push("/admin/plans");
-    } catch (ex) {
-      if (ex instanceof PlanHasOrdersError) {
-        if (!window.confirm(t("planDeleteCascadeConfirm", { name: planName, count: ex.orderCount }))) {
-          return;
-        }
-        try {
-          await adminDeletePlan(planId, true);
-          router.push("/admin/plans");
-        } catch (e2) {
-          setErr(e2 instanceof Error ? e2.message : t("failed"));
-        }
-        return;
+    await deletePlanWithConfirm(
+      { id: Number(id), name: String(plan.name) },
+      ask,
+      t,
+      {
+        onDeleted: () => router.push("/admin/plans"),
+        onError: setErr,
       }
-      setErr(ex instanceof Error ? ex.message : t("failed"));
-    } finally {
-      setDeleting(false);
-    }
+    );
+    setDeleting(false);
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -79,6 +68,7 @@ export default function EditPlanPage() {
         description: fd.get("description"),
         duration_days: planDurationFromForm(fd),
         traffic_gb: planTrafficFromForm(fd),
+        max_devices: Number(fd.get("max_devices") || 1),
         interface_id: Number(fd.get("interface_id")),
         is_active: fd.get("is_active") === "on",
         sort_order: Number(fd.get("sort_order")),
@@ -110,6 +100,7 @@ export default function EditPlanPage() {
 
   return (
     <AdminPage>
+      <ConfirmDialog />
       <AdminBackLink href="/admin/plans" label={t("backToPlans")} />
       <PanelPageHeader title={t("planEditTitle")} />
       <PanelSection
@@ -139,6 +130,15 @@ export default function EditPlanPage() {
             defaultUnlimited={trafficUnlimited}
             defaultGb={trafficGb}
           />
+          <AdminField
+            label={t("planMaxDevices")}
+            name="max_devices"
+            type="number"
+            min="1"
+            defaultValue={Number(plan.max_devices ?? 1)}
+            required
+          />
+          <p className="text-xs text-[var(--muted)] -mt-2">{t("planMaxDevicesHint")}</p>
           <AdminField
             label={t("planInterfaceId")}
             name="interface_id"
@@ -185,7 +185,12 @@ export default function EditPlanPage() {
         </form>
         <div className="mt-8 border-t border-[var(--border)] pt-6">
           <p className="mb-3 text-sm text-[var(--muted)]">{t("planDelete")}</p>
-          <AdminButton type="button" variant="danger" disabled={deleting || loading} onClick={onDelete}>
+          <AdminButton
+            type="button"
+            variant="danger"
+            disabled={deleting || loading}
+            onClick={() => void onDelete()}
+          >
             {deleting ? t("planDeleting") : t("planDelete")}
           </AdminButton>
         </div>

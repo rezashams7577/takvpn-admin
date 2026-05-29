@@ -35,6 +35,7 @@ export default function NewPlanPage() {
         description: fd.get("description"),
         duration_days: planDurationFromForm(fd),
         traffic_gb: planTrafficFromForm(fd),
+        max_devices: Number(fd.get("max_devices") || 1),
         interface_id: Number(fd.get("interface_id") || 1),
         is_active: fd.get("is_active") === "on",
         sort_order: Number(fd.get("sort_order") || 0),
@@ -68,6 +69,15 @@ export default function NewPlanPage() {
           <AdminField label={t("planDescription")} name="description" multiline />
           <PlanDurationFields t={t} />
           <PlanTrafficFields t={t} />
+          <AdminField
+            label={t("planMaxDevices")}
+            name="max_devices"
+            type="number"
+            min="1"
+            defaultValue="1"
+            required
+          />
+          <p className="text-xs text-[var(--muted)] -mt-2">{t("planMaxDevicesHint")}</p>
           <AdminField
             label={t("planInterfaceId")}
             name="interface_id"

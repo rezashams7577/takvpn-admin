@@ -18,3 +18,7 @@ export { AdminRoleProvider, useAdminRole } from "./AdminRoleContext";
 export { AdminSearchForm } from "./AdminSearchForm";
 export { AdminSidebar } from "./AdminSidebar";
 export { AdminStatCard } from "./AdminStatCard";
+export { useConfirmDialog } from "../useConfirmDialog";
+export type { ConfirmOptions } from "../useConfirmDialog";
+export { Modal } from "../Modal";
+export { ConfirmModal } from "../ConfirmModal";
