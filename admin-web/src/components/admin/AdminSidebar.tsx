@@ -12,6 +12,7 @@ const allNav = [
   { href: "/admin/users" as const, key: "users", roles: ["support", "admin", "super_admin"] },
   { href: "/admin/staff/new" as const, key: "createStaff", roles: ["super_admin"] },
   { href: "/admin/payment-settings" as const, key: "paymentSettings", roles: ["super_admin"] },
+  { href: "/admin/site-settings" as const, key: "siteSettings", roles: ["super_admin"] },
   { href: "/admin/plans" as const, key: "plans", roles: ["admin", "super_admin"] },
   { href: "/admin/orders" as const, key: "orders", roles: ["support", "admin", "super_admin"] },
   { href: "/admin/transactions" as const, key: "transactions", roles: ["support", "admin", "super_admin"] },

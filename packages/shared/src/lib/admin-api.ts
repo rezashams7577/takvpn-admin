@@ -268,6 +268,28 @@ export const adminUpdatePaymentSettings = (data: {
     json: data,
   });
 
+export type SiteSettings = {
+  plans_sell_enabled: boolean;
+  ticketing_enabled: boolean;
+  auth_login_enabled: boolean;
+  auth_register_enabled: boolean;
+  updated_at?: string;
+};
+
+export const adminGetSiteSettings = () =>
+  adminFetch<SiteSettings>("/api/v1/admin/site-settings");
+
+export const adminUpdateSiteSettings = (data: {
+  plans_sell_enabled?: boolean;
+  ticketing_enabled?: boolean;
+  auth_login_enabled?: boolean;
+  auth_register_enabled?: boolean;
+}) =>
+  adminFetch<SiteSettings>("/api/v1/admin/site-settings", {
+    method: "PUT",
+    json: data,
+  });
+
 export const adminListVPN = async (status = "") =>
   asArray(
     await adminFetch<VPNServiceAdmin[] | null>(
