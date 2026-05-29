@@ -7,6 +7,7 @@ import { AdminBackLink } from "@/components/admin/AdminBackLink";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminPage } from "@/components/admin/AdminPage";
 import { AdminField } from "@/components/admin/AdminField";
+import { PlanDurationFields, planDurationFromForm } from "@/components/admin/PlanDurationFields";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSubmit } from "@/components/forms";
 import { adminDeletePlan, adminGetPlan, adminUpdatePlan, PlanHasOrdersError } from "@/lib/admin-api";
@@ -66,7 +67,7 @@ export default function EditPlanPage() {
         slug: fd.get("slug"),
         name: fd.get("name"),
         description: fd.get("description"),
-        duration_days: Number(fd.get("duration_days")),
+        duration_days: planDurationFromForm(fd),
         traffic_gb: fd.get("traffic_gb"),
         interface_id: Number(fd.get("interface_id")),
         price_usdt: fd.get("price_usdt"),
@@ -102,12 +103,13 @@ export default function EditPlanPage() {
             defaultValue={String(plan.description || "")}
             multiline
           />
-          <AdminField
-            label={t("planDurationDays")}
-            name="duration_days"
-            type="number"
-            defaultValue={Number(plan.duration_days)}
-            required
+          <PlanDurationFields
+            key={`duration-${String(plan.id)}-${String(plan.duration_days)}`}
+            t={t}
+            defaultUnlimited={plan.duration_days == null}
+            defaultDays={
+              plan.duration_days != null ? Number(plan.duration_days) : 30
+            }
           />
           <AdminField
             label={t("planTrafficGb")}

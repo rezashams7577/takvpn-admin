@@ -18,6 +18,7 @@ export type FormFieldProps = {
   min?: string | number;
   minLength?: number;
   multiline?: boolean;
+  disabled?: boolean;
   id?: string;
 };
 
@@ -35,6 +36,7 @@ export function FormField({
   min,
   minLength,
   multiline,
+  disabled,
   id,
 }: FormFieldProps) {
   const fieldId = id ?? name;
@@ -44,6 +46,7 @@ export function FormField({
     required,
     placeholder,
     dir,
+    disabled,
     className: controlClass,
   };
 

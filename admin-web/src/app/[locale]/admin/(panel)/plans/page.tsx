@@ -87,7 +87,9 @@ export default function AdminPlansPage() {
                   <AdminTableTd className="font-mono text-xs text-[var(--muted)]">{p.slug}</AdminTableTd>
                   <AdminTableTd className="tabular-nums">{formatUsdt(p.price_usdt)}</AdminTableTd>
                   <AdminTableTd className="tabular-nums">{formatIrr(p.price_irr, "en")}</AdminTableTd>
-                  <AdminTableTd className="tabular-nums">{p.duration_days}</AdminTableTd>
+                  <AdminTableTd className="tabular-nums">
+                    {p.duration_days != null ? p.duration_days : t("planDurationUnlimited")}
+                  </AdminTableTd>
                   <AdminTableTd>{p.is_active ? "Yes" : "No"}</AdminTableTd>
                   <AdminTableTd>
                     <div className="flex flex-wrap items-center gap-3">

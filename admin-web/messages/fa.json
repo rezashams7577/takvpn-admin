@@ -350,6 +350,8 @@
     "planName": "نام",
     "planDescription": "توضیحات",
     "planDurationDays": "مدت (روز)",
+    "planDurationUnlimited": "بدون محدودیت زمانی",
+    "planDurationUnlimitedHint": "برای پلنی که بر اساس زمان منقضی نمی‌شود، خالی بگذارید یا گزینه زیر را فعال کنید.",
     "planTrafficGb": "ترافیک (گیگابایت)",
     "planInterfaceId": "شناسه اینترفیس",
     "planPriceUsdt": "قیمت USDT",

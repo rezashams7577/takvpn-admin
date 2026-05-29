@@ -350,6 +350,8 @@
     "planName": "Name",
     "planDescription": "Description",
     "planDurationDays": "Duration (days)",
+    "planDurationUnlimited": "No time limit",
+    "planDurationUnlimitedHint": "Leave empty or check below for a plan that never expires by time.",
     "planTrafficGb": "Traffic (GB)",
     "planInterfaceId": "Interface ID",
     "planPriceUsdt": "Price USDT",

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { AdminBackLink } from "@/components/admin/AdminBackLink";
 import { AdminPage } from "@/components/admin/AdminPage";
 import { AdminField } from "@/components/admin/AdminField";
+import { PlanDurationFields, planDurationFromForm } from "@/components/admin/PlanDurationFields";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSubmit } from "@/components/forms";
 import { adminCreatePlan } from "@/lib/admin-api";
@@ -26,7 +27,7 @@ export default function NewPlanPage() {
         slug: fd.get("slug"),
         name: fd.get("name"),
         description: fd.get("description"),
-        duration_days: Number(fd.get("duration_days")),
+        duration_days: planDurationFromForm(fd),
         traffic_gb: fd.get("traffic_gb"),
         interface_id: Number(fd.get("interface_id") || 1),
         price_usdt: fd.get("price_usdt"),
@@ -54,12 +55,7 @@ export default function NewPlanPage() {
           <AdminField label={t("planSlug")} name="slug" required />
           <AdminField label={t("planName")} name="name" required />
           <AdminField label={t("planDescription")} name="description" multiline />
-          <AdminField
-            label={t("planDurationDays")}
-            name="duration_days"
-            type="number"
-            required
-          />
+          <PlanDurationFields t={t} />
           <AdminField label={t("planTrafficGb")} name="traffic_gb" step="0.01" />
           <AdminField
             label={t("planInterfaceId")}
