@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AdminBackLink } from "@/components/admin/AdminBackLink";
+import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminPage } from "@/components/admin/AdminPage";
 import { AdminField } from "@/components/admin/AdminField";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSubmit } from "@/components/forms";
-import { adminGetPlan, adminUpdatePlan } from "@/lib/admin-api";
+import { adminDeletePlan, adminGetPlan, adminUpdatePlan } from "@/lib/admin-api";
 import { formatUsdt } from "@/lib/format";
 
 export default function EditPlanPage() {
@@ -18,6 +19,7 @@ export default function EditPlanPage() {
   const [err, setErr] = useState("");
   const [loadErr, setLoadErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [plan, setPlan] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
@@ -25,6 +27,21 @@ export default function EditPlanPage() {
       .then((p) => setPlan(p as unknown as Record<string, unknown>))
       .catch((e) => setLoadErr(e instanceof Error ? e.message : t("failed")));
   }, [id, t]);
+
+  async function onDelete() {
+    if (!plan || !window.confirm(t("planDeleteConfirm", { name: String(plan.name) }))) return;
+    setDeleting(true);
+    setErr("");
+    try {
+      await adminDeletePlan(Number(id));
+      router.push("/admin/plans");
+    } catch (ex) {
+      const msg = ex instanceof Error ? ex.message : t("failed");
+      setErr(msg === "plan has orders" ? t("planDeleteInUse") : msg);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -129,6 +146,12 @@ export default function EditPlanPage() {
             {loading ? t("planSaving") : t("planSave")}
           </FormSubmit>
         </form>
+        <div className="mt-8 border-t border-[var(--border)] pt-6">
+          <p className="mb-3 text-sm text-[var(--muted)]">{t("planDelete")}</p>
+          <AdminButton type="button" variant="danger" disabled={deleting || loading} onClick={onDelete}>
+            {deleting ? t("planDeleting") : t("planDelete")}
+          </AdminButton>
+        </div>
       </PanelSection>
     </AdminPage>
   );

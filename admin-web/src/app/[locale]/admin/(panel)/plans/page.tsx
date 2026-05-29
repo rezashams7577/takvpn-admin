@@ -15,7 +15,7 @@ import {
   AdminTableTh,
 } from "@/components/admin";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
-import { adminListPlans, type AdminPlan } from "@/lib/admin-api";
+import { adminDeletePlan, adminListPlans, type AdminPlan } from "@/lib/admin-api";
 import { formatIrr, formatUsdt } from "@/lib/format";
 
 export default function AdminPlansPage() {
@@ -23,6 +23,22 @@ export default function AdminPlansPage() {
   const [plans, setPlans] = useState<AdminPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  async function handleDelete(p: AdminPlan) {
+    if (!window.confirm(t("planDeleteConfirm", { name: p.name }))) return;
+    setDeletingId(p.id);
+    setErr("");
+    try {
+      await adminDeletePlan(p.id);
+      setPlans((prev) => prev.filter((x) => x.id !== p.id));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : t("failed");
+      setErr(msg === "plan has orders" ? t("planDeleteInUse") : msg);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   useEffect(() => {
     adminListPlans()
@@ -59,9 +75,20 @@ export default function AdminPlansPage() {
                   <AdminTableTd className="tabular-nums">{p.duration_days}</AdminTableTd>
                   <AdminTableTd>{p.is_active ? "Yes" : "No"}</AdminTableTd>
                   <AdminTableTd>
-                    <Link href={`/admin/plans/${p.id}/edit`} className="text-brand-600 hover:underline">
-                      Edit
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Link href={`/admin/plans/${p.id}/edit`} className="text-brand-600 hover:underline">
+                        Edit
+                      </Link>
+                      <AdminButton
+                        type="button"
+                        variant="danger"
+                        className="px-2 py-1 text-xs"
+                        disabled={deletingId === p.id}
+                        onClick={() => handleDelete(p)}
+                      >
+                        {deletingId === p.id ? t("planDeleting") : t("planDelete")}
+                      </AdminButton>
+                    </div>
                   </AdminTableTd>
                 </AdminTableRow>
               ))}

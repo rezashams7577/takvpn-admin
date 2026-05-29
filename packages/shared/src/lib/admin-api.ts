@@ -169,6 +169,8 @@ export const adminCreatePlan = (data: Record<string, unknown>) =>
   adminFetch("/api/v1/admin/plans", { method: "POST", json: data });
 export const adminUpdatePlan = (id: number, data: Record<string, unknown>) =>
   adminFetch(`/api/v1/admin/plans/${id}`, { method: "PUT", json: data });
+export const adminDeletePlan = (id: number) =>
+  adminFetch(`/api/v1/admin/plans/${id}`, { method: "DELETE" });
 
 export const adminListCustomers = async (q = "", page = 1) => {
   const r = await adminFetch<{ items: CustomerListItem[] | null; total: number }>(
