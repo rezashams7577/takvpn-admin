@@ -15,7 +15,7 @@ import {
   AdminTableTh,
 } from "@/components/admin";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
-import { adminDeletePlan, adminListPlans, type AdminPlan } from "@/lib/admin-api";
+import { adminDeletePlan, adminListPlans, PlanHasOrdersError, type AdminPlan } from "@/lib/admin-api";
 import { formatIrr, formatUsdt } from "@/lib/format";
 
 export default function AdminPlansPage() {
@@ -33,8 +33,23 @@ export default function AdminPlansPage() {
       await adminDeletePlan(p.id);
       setPlans((prev) => prev.filter((x) => x.id !== p.id));
     } catch (e) {
-      const msg = e instanceof Error ? e.message : t("failed");
-      setErr(msg === "plan has orders" ? t("planDeleteInUse") : msg);
+      if (e instanceof PlanHasOrdersError) {
+        if (
+          !window.confirm(
+            t("planDeleteCascadeConfirm", { name: p.name, count: e.orderCount })
+          )
+        ) {
+          return;
+        }
+        try {
+          await adminDeletePlan(p.id, true);
+          setPlans((prev) => prev.filter((x) => x.id !== p.id));
+        } catch (e2) {
+          setErr(e2 instanceof Error ? e2.message : t("failed"));
+        }
+        return;
+      }
+      setErr(e instanceof Error ? e.message : t("failed"));
     } finally {
       setDeletingId(null);
     }

@@ -18,6 +18,16 @@ export type AdminStats = {
   active_vpn_services: number;
 };
 
+export class PlanHasOrdersError extends Error {
+  readonly orderCount: number;
+
+  constructor(orderCount: number) {
+    super("plan has orders");
+    this.name = "PlanHasOrdersError";
+    this.orderCount = orderCount;
+  }
+}
+
 export type AdminPlan = {
   id: number;
   slug: string;
@@ -156,7 +166,11 @@ async function adminFetch<T>(path: string, init?: RequestInit & { json?: unknown
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error?: string }).error || "Request failed");
+    const msg = (err as { error?: string }).error || "Request failed";
+    if (res.status === 409 && msg === "plan has orders") {
+      throw new PlanHasOrdersError(Number((err as { order_count?: number }).order_count) || 0);
+    }
+    throw new Error(msg);
   }
   return res.json() as Promise<T>;
 }
@@ -169,8 +183,8 @@ export const adminCreatePlan = (data: Record<string, unknown>) =>
   adminFetch("/api/v1/admin/plans", { method: "POST", json: data });
 export const adminUpdatePlan = (id: number, data: Record<string, unknown>) =>
   adminFetch(`/api/v1/admin/plans/${id}`, { method: "PUT", json: data });
-export const adminDeletePlan = (id: number) =>
-  adminFetch(`/api/v1/admin/plans/${id}`, { method: "DELETE" });
+export const adminDeletePlan = (id: number, cascade = false) =>
+  adminFetch(`/api/v1/admin/plans/${id}${cascade ? "?cascade=1" : ""}`, { method: "DELETE" });
 
 export const adminListCustomers = async (q = "", page = 1) => {
   const r = await adminFetch<{ items: CustomerListItem[] | null; total: number }>(

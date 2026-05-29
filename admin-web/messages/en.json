@@ -363,7 +363,7 @@
     "planDelete": "Delete",
     "planDeleting": "Deleting…",
     "planDeleteConfirm": "Delete plan \"{name}\"? This cannot be undone.",
-    "planDeleteInUse": "This plan cannot be deleted because it has existing orders.",
+    "planDeleteCascadeConfirm": "Plan \"{name}\" has {count, plural, one {# order} other {# orders}}. Delete the plan and all related orders and VPN services? This cannot be undone.",
     "roleCustomer": "customer",
     "roleSupport": "support",
     "roleAdmin": "admin",

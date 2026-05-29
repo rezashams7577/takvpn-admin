@@ -9,7 +9,7 @@ import { AdminPage } from "@/components/admin/AdminPage";
 import { AdminField } from "@/components/admin/AdminField";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSubmit } from "@/components/forms";
-import { adminDeletePlan, adminGetPlan, adminUpdatePlan } from "@/lib/admin-api";
+import { adminDeletePlan, adminGetPlan, adminUpdatePlan, PlanHasOrdersError } from "@/lib/admin-api";
 import { formatUsdt } from "@/lib/format";
 
 export default function EditPlanPage() {
@@ -32,12 +32,25 @@ export default function EditPlanPage() {
     if (!plan || !window.confirm(t("planDeleteConfirm", { name: String(plan.name) }))) return;
     setDeleting(true);
     setErr("");
+    const planName = String(plan.name);
+    const planId = Number(id);
     try {
-      await adminDeletePlan(Number(id));
+      await adminDeletePlan(planId);
       router.push("/admin/plans");
     } catch (ex) {
-      const msg = ex instanceof Error ? ex.message : t("failed");
-      setErr(msg === "plan has orders" ? t("planDeleteInUse") : msg);
+      if (ex instanceof PlanHasOrdersError) {
+        if (!window.confirm(t("planDeleteCascadeConfirm", { name: planName, count: ex.orderCount }))) {
+          return;
+        }
+        try {
+          await adminDeletePlan(planId, true);
+          router.push("/admin/plans");
+        } catch (e2) {
+          setErr(e2 instanceof Error ? e2.message : t("failed"));
+        }
+        return;
+      }
+      setErr(ex instanceof Error ? ex.message : t("failed"));
     } finally {
       setDeleting(false);
     }

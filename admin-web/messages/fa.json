@@ -363,7 +363,7 @@
     "planDelete": "حذف",
     "planDeleting": "در حال حذف…",
     "planDeleteConfirm": "پلن «{name}» حذف شود؟ این عمل قابل بازگشت نیست.",
-    "planDeleteInUse": "این پلن به‌دلیل داشتن سفارش قابل حذف نیست.",
+    "planDeleteCascadeConfirm": "پلن «{name}» دارای {count} سفارش است. پلن و همه سفارش‌ها و سرویس‌های VPN مرتبط حذف شوند؟ این عمل قابل بازگشت نیست.",
     "roleCustomer": "customer",
     "roleSupport": "support",
     "roleAdmin": "admin",
