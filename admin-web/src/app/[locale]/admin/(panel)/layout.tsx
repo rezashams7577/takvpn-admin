@@ -1,6 +1,4 @@
-import { headers } from "next/headers";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
-import { pathnameFromHeaders } from "@/lib/pathname";
 import { Link } from "@/i18n/navigation";
 import { fetchMe } from "@/lib/api";
 import { AdminRoleProvider } from "@/components/admin/AdminRoleContext";
@@ -45,8 +43,6 @@ export default async function AdminPanelLayout({ children }: Props) {
   }
 
   const userLocale = me.locale || locale;
-  const h = await headers();
-  const pathname = pathnameFromHeaders((name) => h.get(name));
 
   return (
     <PanelShell
@@ -57,7 +53,6 @@ export default async function AdminPanelLayout({ children }: Props) {
           role={me.role as StaffRole}
           email={me.email}
           locale={userLocale}
-          pathname={pathname}
         />
       }
     >

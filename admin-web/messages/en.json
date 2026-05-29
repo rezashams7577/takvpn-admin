@@ -191,6 +191,8 @@
     "audit": "Audit log",
     "settings": "Settings",
     "signedInAs": "Signed in as",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
     "customerAccount": "Customer account",
     "myAccount": "My account",
     "wallet": "Wallet",

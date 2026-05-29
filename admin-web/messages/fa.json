@@ -191,6 +191,8 @@
     "audit": "گزارش ممیزی",
     "settings": "تنظیمات",
     "signedInAs": "ورود به عنوان",
+    "signOut": "خروج",
+    "signingOut": "در حال خروج…",
     "customerAccount": "حساب مشتری",
     "myAccount": "پنل من",
     "wallet": "کیف پول",

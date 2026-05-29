@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { StaffRole } from "@/lib/admin-api";
+import { logout } from "@/lib/api";
 import { userAppUrl } from "@/lib/app-urls";
 
 const allNav = [
@@ -24,12 +26,25 @@ type Props = {
   role: StaffRole;
   email: string;
   locale: string;
-  pathname: string;
 };
 
-export function AdminSidebar({ role, email, locale, pathname }: Props) {
+export function AdminSidebar({ role, email, locale }: Props) {
   const t = useTranslations("adminPanel");
+  const pathname = usePathname();
+  const router = useRouter();
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const nav = allNav.filter((n) => (n.roles as readonly string[]).includes(role));
+
+  async function handleLogout() {
+    setLogoutLoading(true);
+    try {
+      await logout();
+    } catch {
+      // still clear session locally
+    }
+    router.replace("/admin/login");
+    router.refresh();
+  }
 
   return (
     <div>
@@ -38,6 +53,14 @@ export function AdminSidebar({ role, email, locale, pathname }: Props) {
         {email}
       </p>
       <p className="text-xs text-brand-600 px-3 mb-4 capitalize">{role.replace("_", " ")}</p>
+      <button
+        type="button"
+        onClick={handleLogout}
+        disabled={logoutLoading}
+        className="mx-3 mb-4 w-[calc(100%-1.5rem)] rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium hover:bg-brand-50 dark:hover:bg-brand-900/30 disabled:opacity-60"
+      >
+        {logoutLoading ? t("signingOut") : t("signOut")}
+      </button>
       <nav className="flex flex-col gap-1 text-sm font-medium">
         {nav.map((item) => {
           const active =
