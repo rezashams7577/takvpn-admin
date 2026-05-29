@@ -15,12 +15,20 @@ import {
   AdminTableTh,
 } from "@/components/admin";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
-import { adminDeletePlan, adminListPlans, PlanHasOrdersError, type AdminPlan } from "@/lib/admin-api";
+import {
+  adminDeletePlan,
+  adminGetPaymentSettings,
+  adminListPlans,
+  PlanHasOrdersError,
+  type AdminPlan,
+  type PaymentSettings,
+} from "@/lib/admin-api";
 import { formatIrr, formatUsdt } from "@/lib/format";
 
 export default function AdminPlansPage() {
   const t = useTranslations("adminPanel");
   const [plans, setPlans] = useState<AdminPlan[]>([]);
+  const [payment, setPayment] = useState<PaymentSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -56,11 +64,17 @@ export default function AdminPlansPage() {
   }
 
   useEffect(() => {
-    adminListPlans()
-      .then(setPlans)
+    Promise.all([adminListPlans(), adminGetPaymentSettings()])
+      .then(([p, ps]) => {
+        setPlans(p);
+        setPayment(ps);
+      })
       .catch((e) => setErr(e instanceof Error ? e.message : "Failed"))
       .finally(() => setLoading(false));
   }, []);
+
+  const showUsdt = payment?.usdt_enabled !== false;
+  const showToman = payment?.toman_enabled !== false;
 
   return (
     <AdminPage className="max-w-5xl">
@@ -74,8 +88,8 @@ export default function AdminPlansPage() {
             <AdminTableHead>
               <AdminTableTh>Name</AdminTableTh>
               <AdminTableTh>Slug</AdminTableTh>
-              <AdminTableTh className="tabular-nums">USDT</AdminTableTh>
-              <AdminTableTh className="tabular-nums">IRR</AdminTableTh>
+              {showUsdt && <AdminTableTh className="tabular-nums">USDT</AdminTableTh>}
+              {showToman && <AdminTableTh className="tabular-nums">IRR</AdminTableTh>}
               <AdminTableTh className="tabular-nums">Days</AdminTableTh>
               <AdminTableTh>Active</AdminTableTh>
               <AdminTableTh>Actions</AdminTableTh>
@@ -85,8 +99,12 @@ export default function AdminPlansPage() {
                 <AdminTableRow key={p.id}>
                   <AdminTableTd>{p.name}</AdminTableTd>
                   <AdminTableTd className="font-mono text-xs text-[var(--muted)]">{p.slug}</AdminTableTd>
-                  <AdminTableTd className="tabular-nums">{formatUsdt(p.price_usdt)}</AdminTableTd>
-                  <AdminTableTd className="tabular-nums">{formatIrr(p.price_irr, "en")}</AdminTableTd>
+                  {showUsdt && (
+                    <AdminTableTd className="tabular-nums">{formatUsdt(p.price_usdt ?? "0")}</AdminTableTd>
+                  )}
+                  {showToman && (
+                    <AdminTableTd className="tabular-nums">{formatIrr(p.price_irr ?? "0", "en")}</AdminTableTd>
+                  )}
                   <AdminTableTd className="tabular-nums">
                     {p.duration_days != null ? p.duration_days : t("planDurationUnlimited")}
                   </AdminTableTd>

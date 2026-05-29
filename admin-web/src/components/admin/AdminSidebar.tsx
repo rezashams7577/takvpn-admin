@@ -15,7 +15,6 @@ const allNav = [
   { href: "/admin/transactions" as const, key: "transactions", roles: ["support", "admin", "super_admin"] },
   { href: "/admin/deposits" as const, key: "deposits", roles: ["support", "admin", "super_admin"] },
   { href: "/admin/tickets" as const, key: "tickets", roles: ["support", "admin", "super_admin"] },
-  { href: "/admin/exchange-rate" as const, key: "exchangeRate", roles: ["admin", "super_admin"] },
   { href: "/admin/vpn" as const, key: "vpn", roles: ["support", "admin", "super_admin"] },
   { href: "/admin/audit" as const, key: "audit", roles: ["admin", "super_admin"] },
   { href: "/admin/settings" as const, key: "settings", roles: ["support", "admin", "super_admin"] },

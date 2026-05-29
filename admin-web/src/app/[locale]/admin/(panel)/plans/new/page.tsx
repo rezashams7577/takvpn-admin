@@ -1,21 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AdminBackLink } from "@/components/admin/AdminBackLink";
 import { AdminPage } from "@/components/admin/AdminPage";
 import { AdminField } from "@/components/admin/AdminField";
 import { PlanDurationFields, planDurationFromForm } from "@/components/admin/PlanDurationFields";
+import { PlanTrafficFields, planTrafficFromForm } from "@/components/admin/PlanTrafficFields";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSubmit } from "@/components/forms";
-import { adminCreatePlan } from "@/lib/admin-api";
+import { adminCreatePlan, adminGetPaymentSettings, type PaymentSettings } from "@/lib/admin-api";
 
 export default function NewPlanPage() {
   const t = useTranslations("adminPanel");
   const router = useRouter();
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [payment, setPayment] = useState<PaymentSettings | null>(null);
+
+  useEffect(() => {
+    adminGetPaymentSettings().then(setPayment).catch(() => setPayment(null));
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -23,18 +29,23 @@ export default function NewPlanPage() {
     setErr("");
     const fd = new FormData(e.currentTarget);
     try {
-      await adminCreatePlan({
+      const body: Record<string, unknown> = {
         slug: fd.get("slug"),
         name: fd.get("name"),
         description: fd.get("description"),
         duration_days: planDurationFromForm(fd),
-        traffic_gb: fd.get("traffic_gb"),
+        traffic_gb: planTrafficFromForm(fd),
         interface_id: Number(fd.get("interface_id") || 1),
-        price_usdt: fd.get("price_usdt"),
-        price_irr: fd.get("price_irr"),
         is_active: fd.get("is_active") === "on",
         sort_order: Number(fd.get("sort_order") || 0),
-      });
+      };
+      if (payment?.usdt_enabled) {
+        body.price_usdt = fd.get("price_usdt");
+      }
+      if (payment?.toman_enabled) {
+        body.price_irr = fd.get("price_irr");
+      }
+      await adminCreatePlan(body);
       router.push("/admin/plans");
     } catch (ex) {
       setErr(ex instanceof Error ? ex.message : t("failed"));
@@ -56,20 +67,24 @@ export default function NewPlanPage() {
           <AdminField label={t("planName")} name="name" required />
           <AdminField label={t("planDescription")} name="description" multiline />
           <PlanDurationFields t={t} />
-          <AdminField label={t("planTrafficGb")} name="traffic_gb" step="0.01" />
+          <PlanTrafficFields t={t} />
           <AdminField
             label={t("planInterfaceId")}
             name="interface_id"
             type="number"
             defaultValue="1"
           />
-          <AdminField
-            label={t("planPriceUsdt")}
-            name="price_usdt"
-            required
-            step="0.01"
-          />
-          <AdminField label={t("planPriceIrr")} name="price_irr" required />
+          {payment?.usdt_enabled && (
+            <AdminField
+              label={t("planPriceUsdt")}
+              name="price_usdt"
+              required
+              step="0.01"
+            />
+          )}
+          {payment?.toman_enabled && (
+            <AdminField label={t("planPriceIrr")} name="price_irr" required />
+          )}
           <AdminField
             label={t("planSortOrder")}
             name="sort_order"

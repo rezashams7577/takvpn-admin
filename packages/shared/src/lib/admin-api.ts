@@ -38,8 +38,8 @@ export type AdminPlan = {
   duration_days: number | null;
   traffic_gb?: string;
   interface_id: number;
-  price_usdt: string;
-  price_irr: string;
+  price_usdt?: string;
+  price_irr?: string;
   is_active: boolean;
   sort_order: number;
 };
@@ -243,12 +243,11 @@ export const adminApproveUSdt = (id: number, tx_hash: string, note: string) =>
   });
 export const adminRejectUSDT = (id: number, note: string) =>
   adminFetch(`/api/v1/admin/usdt-deposits/${id}/reject`, { method: "POST", json: { note } });
-export const adminSetExchangeRate = (usdt_irr: string) =>
-  adminFetch("/api/v1/admin/exchange-rate", { method: "POST", json: { usdt_irr } });
-
 export type PaymentSettings = {
   trc20_deposit_address: string;
   erc20_deposit_address: string;
+  usdt_enabled: boolean;
+  toman_enabled: boolean;
   effective: { trc20: string; erc20: string };
   env_fallback: { trc20: string; erc20: string };
   updated_at?: string;
@@ -260,6 +259,8 @@ export const adminGetPaymentSettings = () =>
 export const adminUpdatePaymentSettings = (data: {
   trc20_deposit_address: string;
   erc20_deposit_address: string;
+  usdt_enabled?: boolean;
+  toman_enabled?: boolean;
 }) =>
   adminFetch<PaymentSettings>("/api/v1/admin/payment-settings", {
     method: "PUT",

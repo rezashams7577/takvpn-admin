@@ -8,9 +8,17 @@ import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminPage } from "@/components/admin/AdminPage";
 import { AdminField } from "@/components/admin/AdminField";
 import { PlanDurationFields, planDurationFromForm } from "@/components/admin/PlanDurationFields";
+import { PlanTrafficFields, planTrafficFromForm } from "@/components/admin/PlanTrafficFields";
 import { PanelPageHeader, PanelSection } from "@/components/layout";
 import { FormMessage, FormSubmit } from "@/components/forms";
-import { adminDeletePlan, adminGetPlan, adminUpdatePlan, PlanHasOrdersError } from "@/lib/admin-api";
+import {
+  adminDeletePlan,
+  adminGetPaymentSettings,
+  adminGetPlan,
+  adminUpdatePlan,
+  PlanHasOrdersError,
+  type PaymentSettings,
+} from "@/lib/admin-api";
 import { formatUsdt } from "@/lib/format";
 
 export default function EditPlanPage() {
@@ -22,8 +30,10 @@ export default function EditPlanPage() {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [plan, setPlan] = useState<Record<string, unknown> | null>(null);
+  const [payment, setPayment] = useState<PaymentSettings | null>(null);
 
   useEffect(() => {
+    adminGetPaymentSettings().then(setPayment).catch(() => setPayment(null));
     adminGetPlan(Number(id))
       .then((p) => setPlan(p as unknown as Record<string, unknown>))
       .catch((e) => setLoadErr(e instanceof Error ? e.message : t("failed")));
@@ -63,18 +73,23 @@ export default function EditPlanPage() {
     setErr("");
     const fd = new FormData(e.currentTarget);
     try {
-      await adminUpdatePlan(Number(id), {
+      const body: Record<string, unknown> = {
         slug: fd.get("slug"),
         name: fd.get("name"),
         description: fd.get("description"),
         duration_days: planDurationFromForm(fd),
-        traffic_gb: fd.get("traffic_gb"),
+        traffic_gb: planTrafficFromForm(fd),
         interface_id: Number(fd.get("interface_id")),
-        price_usdt: fd.get("price_usdt"),
-        price_irr: fd.get("price_irr"),
         is_active: fd.get("is_active") === "on",
         sort_order: Number(fd.get("sort_order")),
-      });
+      };
+      if (payment?.usdt_enabled) {
+        body.price_usdt = fd.get("price_usdt");
+      }
+      if (payment?.toman_enabled) {
+        body.price_irr = fd.get("price_irr");
+      }
+      await adminUpdatePlan(Number(id), body);
       router.push("/admin/plans");
     } catch (ex) {
       setErr(ex instanceof Error ? ex.message : t("failed"));
@@ -85,6 +100,13 @@ export default function EditPlanPage() {
 
   if (!plan && !loadErr) return <p className="text-[var(--muted)]">{t("loading")}</p>;
   if (!plan) return <p className="text-sm text-[var(--danger)]">{loadErr}</p>;
+
+  const trafficUnlimited =
+    plan.traffic_gb == null || plan.traffic_gb === "";
+  const trafficGb =
+    plan.traffic_gb != null && plan.traffic_gb !== ""
+      ? formatUsdt(String(plan.traffic_gb))
+      : "";
 
   return (
     <AdminPage>
@@ -111,15 +133,11 @@ export default function EditPlanPage() {
               plan.duration_days != null ? Number(plan.duration_days) : 30
             }
           />
-          <AdminField
-            label={t("planTrafficGb")}
-            name="traffic_gb"
-            defaultValue={
-              plan.traffic_gb != null && plan.traffic_gb !== ""
-                ? formatUsdt(String(plan.traffic_gb))
-                : ""
-            }
-            step="0.01"
+          <PlanTrafficFields
+            key={`traffic-${String(plan.id)}-${String(plan.traffic_gb)}`}
+            t={t}
+            defaultUnlimited={trafficUnlimited}
+            defaultGb={trafficGb}
           />
           <AdminField
             label={t("planInterfaceId")}
@@ -128,19 +146,23 @@ export default function EditPlanPage() {
             defaultValue={Number(plan.interface_id)}
             required
           />
-          <AdminField
-            label={t("planPriceUsdt")}
-            name="price_usdt"
-            defaultValue={formatUsdt(String(plan.price_usdt))}
-            required
-            step="0.01"
-          />
-          <AdminField
-            label={t("planPriceIrr")}
-            name="price_irr"
-            defaultValue={String(plan.price_irr)}
-            required
-          />
+          {payment?.usdt_enabled && (
+            <AdminField
+              label={t("planPriceUsdt")}
+              name="price_usdt"
+              defaultValue={formatUsdt(String(plan.price_usdt))}
+              required
+              step="0.01"
+            />
+          )}
+          {payment?.toman_enabled && (
+            <AdminField
+              label={t("planPriceIrr")}
+              name="price_irr"
+              defaultValue={String(plan.price_irr)}
+              required
+            />
+          )}
           <AdminField
             label={t("planSortOrder")}
             name="sort_order"
